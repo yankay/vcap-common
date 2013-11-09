@@ -26,7 +26,19 @@ module VCAP
         optional :description,  String
         optional :info_url,     URI::regexp(%w(http https))
         optional :tags,         [String]
+        optional :plan_details do
+          [
+            {
+              "name" => String,
+              "free" => bool,
+              optional("description") => String,
+              optional("extra") => String,
+              optional("unique_id") => String,
+            }
+          ]
+        end
         optional :plans,        [String]
+        optional :plan_descriptions
         optional :cf_plan_id
         optional :plan_options
         optional :binding_options
@@ -35,6 +47,8 @@ module VCAP
         optional :timeout,      Integer
         optional :provider,     String
         optional :default_plan, String
+        optional :extra,        String
+        optional :unique_id,    String
       end
 
       class ProxiedServiceOfferingRequest < JsonMessage
@@ -46,6 +60,12 @@ module VCAP
       class HandleUpdateRequest < JsonMessage
         required :service_id, String
         required :configuration
+        required :credentials
+      end
+
+      class HandleUpdateRequestV2 < JsonMessage
+        required :token, String
+        required :gateway_data
         required :credentials
       end
 
@@ -72,12 +92,16 @@ module VCAP
       end
 
       class GatewayProvisionRequest < JsonMessage
-        required :label, SERVICE_LABEL_REGEX
-        required :name,  String
-        required :plan,  String
-        required :email, String
-        required :version, String
+        required :unique_id, String
+        required :name,      String
+        optional :email,     String
 
+        optional :provider,          String
+        optional :label,             String
+        optional :plan,              String
+        optional :version,           String
+        optional :organization_guid, String
+        optional :space_guid,        String
         optional :plan_option
       end
 
@@ -86,6 +110,7 @@ module VCAP
         required :service_id, String
         required :configuration
         required :credentials
+        optional :dashboard_url, String
       end
 
       #
@@ -135,6 +160,24 @@ module VCAP
 
       class SnapshotList < JsonMessage
         required :snapshots,  [Object]
+      end
+
+      class CreateSnapshotV2Request < JsonMessage
+        required :name, /./
+      end
+
+      class SnapshotV2 < JsonMessage
+        required :snapshot_id, String
+        required :name,  String
+        required :state, String
+        required :size,  Integer
+
+        optional :created_time,  String
+        optional :restored_time, String
+      end
+
+      class SnapshotListV2 < JsonMessage
+        required :snapshots, [Object]
       end
 
       class UpdateSnapshotNameRequest < JsonMessage
